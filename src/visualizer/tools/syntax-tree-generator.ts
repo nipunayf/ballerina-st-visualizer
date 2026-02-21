@@ -11,7 +11,7 @@ export const nodeMembers: any[] = [];
 export const nodeEdges: any[] = [];
 export let checkNodePath: boolean = false;
 
-let graphicalTreeObj: TreeNode[] = [];
+export let graphicalTreeObj: TreeNode[] = [];
 
 export function retrieveGraph(responseTree: any, activatedCommand: string) {
     syntaxTreeObj.splice(0, syntaxTreeObj.length);
@@ -30,6 +30,47 @@ export function updateSyntaxTree(nodeID: string, isGraphical: boolean) {
     mapSyntaxGraph(isGraphical ? graphicalTreeObj : syntaxTreeObj, nodeID, isGraphical, nodeMembers, nodeEdges, checkNodePath);
 
     return setGraph();
+}
+
+export function expandToNode(targetNodeID: string) {
+    // We need to trace parents. So let's build a map of parent pointers first
+    const parentMap = new Map<string, string>();
+    
+    function buildParentMap(nodes: TreeNode[], parentId?: string) {
+        for (const n of nodes) {
+            if (parentId) parentMap.set(n.nodeID, parentId);
+            if (n.children && n.children.length > 0) {
+                buildParentMap(n.children, n.nodeID);
+            }
+        }
+    }
+    buildParentMap(graphicalTreeObj);
+
+    // Collect all ancestors
+    const ancestors = new Set<string>();
+    let curr = parentMap.get(targetNodeID);
+    while (curr) {
+        ancestors.add(curr);
+        curr = parentMap.get(curr);
+    }
+
+    // Now set didCollapse = true for all ancestors in graphicalTreeObj
+    function setCollapseForAncestors(nodes: TreeNode[]) {
+        for (let i = 0; i < nodes.length; i++) {
+            if (ancestors.has(nodes[i].nodeID)) {
+                nodes[i] = {
+                    ...nodes[i],
+                    didCollapse: true
+                };
+            }
+            if (nodes[i].children && nodes[i].children.length > 0) {
+                setCollapseForAncestors(nodes[i].children);
+            }
+        }
+    }
+    
+    setCollapseForAncestors(graphicalTreeObj);
+    return updateSyntaxTree("", true);
 }
 
 function setGraph() {

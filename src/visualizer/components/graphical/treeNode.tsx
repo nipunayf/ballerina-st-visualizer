@@ -51,6 +51,7 @@ function TreeNode(props: GraphicalNodeProps) {
     return (
         <div>
             <motion.div
+                id={`node-${node.id}`}
                 initial={{
                     opacity: 0,
                     scale: 0.8,
@@ -83,7 +84,10 @@ function TreeNode(props: GraphicalNodeProps) {
                                 ...styles.iconStyle,
                                 cursor: "pointer"
                             }}
-                            onClick={onFindNode}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onFindNode();
+                            }}
                         >
                             <span style={{
                                 fontSize: 14,
