@@ -299,6 +299,35 @@ function App() {
     }, 2000);
   }, [code]);
 
+  const navigateToNode = useCallback((node: any) => {
+    if (node?.nodeID) {
+      const graphResult = expandToNode(node.nodeID);
+      elk.layout(graphResult.treeGraph).then((_layoutResult) => {
+        setRenderKey((k) => k + 1);
+
+        setTimeout(() => {
+          const el = document.getElementById(`node-${node.nodeID}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            el.classList.add('node-flash');
+            setTimeout(() => {
+              el.classList.remove('node-flash');
+            }, 1500);
+          }
+        }, 300);
+      });
+      
+      setHoveredNodeInfo(null);
+    }
+  }, []);
+
+  const handleEditorClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if ((e.ctrlKey || e.metaKey) && hoveredNodeInfo?.node) {
+      e.preventDefault();
+      navigateToNode(hoveredNodeInfo.node);
+    }
+  }, [hoveredNodeInfo, navigateToNode]);
+
   const handleEditorMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!syntaxTreeData || isResizing.current) {
       if (hoveredNodeInfo) setHoveredNodeInfo(null);
@@ -507,7 +536,12 @@ function App() {
             <span>Source Code</span>
             <span className="pane-lang-badge">.bal</span>
           </div>
-          <div className="editor-wrapper" onMouseMove={handleEditorMouseMove} onMouseLeave={() => setHoveredNodeInfo(null)}>
+          <div 
+            className="editor-wrapper" 
+            onMouseMove={handleEditorMouseMove} 
+            onMouseLeave={() => setHoveredNodeInfo(null)}
+            onClick={handleEditorClick}
+          >
             <Editor
               value={code}
               onValueChange={handleCodeChange}
@@ -589,27 +623,7 @@ function App() {
         return (
           <div
             className="hover-chip"
-            onClick={() => {
-              if (hoveredNodeInfo.node?.nodeID) {
-                const graphResult = expandToNode(hoveredNodeInfo.node.nodeID);
-                elk.layout(graphResult.treeGraph).then((_layoutResult) => {
-                  setRenderKey((k) => k + 1);
-
-                  setTimeout(() => {
-                    const el = document.getElementById(`node-${hoveredNodeInfo.node.nodeID}`);
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-                      el.classList.add('node-flash');
-                      setTimeout(() => {
-                        el.classList.remove('node-flash');
-                      }, 1500);
-                    }
-                  }, 300);
-                });
-
-                setHoveredNodeInfo(null);
-              }
-            }}
+            onClick={() => navigateToNode(hoveredNodeInfo.node)}
             style={{
               top: Math.max(margin, clampedTop),
               left: Math.max(margin, clampedLeft),
