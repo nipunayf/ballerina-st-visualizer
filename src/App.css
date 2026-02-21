@@ -301,3 +301,61 @@ body,
 .hljs-variable {
     color: var(--text-primary);
 }
+
+/* Hover chip: floating pill that appears near cursor when hovering over source code */
+.hover-chip {
+    position: fixed;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    border: none;
+    z-index: 9999;
+    cursor: pointer;
+    pointer-events: auto;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    transition: opacity 0.15s ease;
+}
+
+.hover-chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    font-size: 10px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.hover-chip-locate {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Source code highlight overlay: teal rectangles over matched AST node text.
+   z-index must be high enough to render above the Editor's internal <textarea>
+   (which is position:absolute). pointer-events:none ensures mouse events still
+   pass through to the textarea for editing and hover detection. */
+.highlight-overlay {
+    position: absolute;
+    background: rgba(32, 182, 176, 0.2);
+    border: 1px solid rgba(32, 182, 176, 0.5);
+    border-radius: 3px;
+    pointer-events: none;
+    z-index: 10;
+    transition: all 0.1s ease;
+}
+
+/* Flash animation applied to tree nodes when navigated to via chip click */
+.node-flash {
+    box-shadow: 0 0 0 4px #00FFB2, 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    transition: box-shadow 0.3s ease;
+}
