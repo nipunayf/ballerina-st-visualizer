@@ -413,7 +413,11 @@ function App() {
 
         if (isInside) {
           const range = (pos.endLine - pos.startLine) * 10000 + (pos.endColumn - pos.startColumn);
-          if (range <= minRange) {
+
+          // Only highlight leaf nodes (nodes with no children)
+          const isLeaf = !n.children || n.children.length === 0;
+
+          if (range <= minRange && isLeaf) {
             minRange = range;
             bestNode = n;
           }
